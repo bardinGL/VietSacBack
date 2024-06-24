@@ -1,4 +1,7 @@
 ﻿using AutoMapper;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNetCore.Http;
 using VietSacBackend._2.Service.Interface;
 using VietSacBackend._3.Repository.Repository;
 using VietSacBackend._3.Repository.Data;
@@ -114,6 +117,19 @@ namespace VietSacBackend._2.Service
         {
             var products = _productRepository.Get(p => p.Category.Purpose == purpose);
             return _mapper.Map<IEnumerable<ResponseProductModel>>(products);
+        }
+
+        // New methods to handle product images
+        public IEnumerable<string> GetAllProductImages()
+        {
+            var products = _productRepository.GetAll();
+            return products.Select(p => p.image).Where(img => img != null).ToList();
+        }
+
+        public string GetProductImageById(string id)
+        {
+            var product = _productRepository.GetById(id);
+            return product?.image;
         }
     }
 }

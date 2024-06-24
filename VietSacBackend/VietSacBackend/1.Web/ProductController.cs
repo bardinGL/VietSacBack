@@ -88,5 +88,29 @@ namespace VietSacBackend._1.Web
             var responseModel = _productService.GetProductsByPurpose(purpose);
             return Ok(responseModel);
         }
+
+        // Get all product images
+        [HttpGet("images")]
+        public IActionResult GetAllProductImages()
+        {
+            var images = _productService.GetAllProductImages();
+            if (images.Any())
+            {
+                return Ok(images);
+            }
+            return NotFound("No images found.");
+        }
+
+        // Get a specific product image by ID
+        [HttpGet("{id}/image")]
+        public IActionResult GetProductImageById(string id)
+        {
+            var image = _productService.GetProductImageById(id);
+            if (!string.IsNullOrEmpty(image))
+            {
+                return Ok(image);
+            }
+            return NotFound($"No image found for product ID {id}.");
+        }
     }
 }

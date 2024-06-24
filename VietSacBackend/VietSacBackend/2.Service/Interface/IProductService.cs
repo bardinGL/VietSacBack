@@ -13,5 +13,8 @@ namespace VietSacBackend._2.Service.Interface
         IEnumerable<ResponseProductModel> GetProductsByBrand(string brand);
         IEnumerable<ResponseProductModel> GetProductsByPurpose(string purpose);
         IEnumerable<ResponseProductModel> GetProductsByCategory(string categoryId);
+
+        IEnumerable<string> GetAllProductImages();  
+        string GetProductImageById(string id);
     }
 }

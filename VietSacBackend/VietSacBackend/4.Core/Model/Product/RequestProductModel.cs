@@ -16,5 +16,6 @@ namespace VietSacBackend._4.Core.Model.Product
         public decimal Quantity { get; set; }
 
         public int? Discount { get; set; }
+        public string Image { get; set; }
     }
 }

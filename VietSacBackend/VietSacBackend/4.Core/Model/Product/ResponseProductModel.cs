@@ -9,5 +9,6 @@
         public decimal Price { get; set; }
         public decimal Quantity { get; set; }
         public int? Discount { get; set; }
+        public string Image { get; set; }
     }
 }
