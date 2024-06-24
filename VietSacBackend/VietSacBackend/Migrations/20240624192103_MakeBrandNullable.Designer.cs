@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VietSacBackend._3.Repository.Data;
 
@@ -11,9 +12,10 @@ using VietSacBackend._3.Repository.Data;
 namespace VietSacBackend.Migrations
 {
     [DbContext(typeof(VietSacContext))]
-    partial class VietSacContextModelSnapshot : ModelSnapshot
+    [Migration("20240624192103_MakeBrandNullable")]
+    partial class MakeBrandNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

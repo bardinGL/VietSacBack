@@ -2,6 +2,8 @@
 {
     public class RequestCategoryModel
     {
-        public string CategoryName { get; set; }
+        public string category_name { get; set; }
+        public string? Brand { get; set; }
+        public string? Purpose { get; set; }
     }
 }

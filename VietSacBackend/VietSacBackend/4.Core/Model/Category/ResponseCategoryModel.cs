@@ -3,6 +3,6 @@
     public class ResponseCategoryModel
     {
         public string Id { get; set; }
-        public string CategoryName { get; set; }
+        public string category_name { get; set; }
     }
 }

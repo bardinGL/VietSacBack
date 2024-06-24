@@ -5,7 +5,7 @@ namespace VietSacBackend._4.Core.Model.Product
     public class RequestProductModel
     {
         [Required(ErrorMessage = "Category ID is required")]
-        public string CategoryId { get; set; }
+        public string category_id { get; set; }
 
         public string Name { get; set; }
 
