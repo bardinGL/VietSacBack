@@ -81,7 +81,7 @@ builder.Services.AddScoped<GenerateToken>();
 // Swagger
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API Name", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "VietSac", Version = "v1" });
 
     // Set the comments path for the Swagger JSON and UI.
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";

@@ -19,6 +19,11 @@ namespace VietSacBackend._1.Web
         [HttpPost]
         public IActionResult CreateProduct([FromBody] RequestProductModel requestProductModel)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState); // Return validation errors
+            }
+
             var responseModel = _productService.CreateProduct(requestProductModel);
             return StatusCode(responseModel.StatusCode, responseModel);
         }
@@ -27,6 +32,11 @@ namespace VietSacBackend._1.Web
         [HttpPut("{id}")]
         public IActionResult UpdateProduct(string id, [FromBody] RequestProductModel requestProductModel)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState); // Return validation errors
+            }
+
             var responseModel = _productService.UpdateProduct(id, requestProductModel);
             return StatusCode(responseModel.StatusCode, responseModel);
         }
