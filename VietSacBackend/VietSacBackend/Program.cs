@@ -103,5 +103,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.UseCors("corspolicy");
 app.Run();
