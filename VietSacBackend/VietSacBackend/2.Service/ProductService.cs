@@ -131,5 +131,19 @@ namespace VietSacBackend._2.Service
             var product = _productRepository.GetById(id);
             return product?.image;
         }
+
+        public ResponseModel<GetProductModel> GetProductsWithHighestDiscount()
+        {
+            var products = _productRepository.GetAll();
+            var maxDiscount = products.Max(p => p.discount);
+            var productsWithHighestDiscount = products.Where(p => p.discount == maxDiscount).ToList();
+
+            return new ResponseModel<GetProductModel>
+            {
+                Data = _mapper.Map<List<GetProductModel>>(productsWithHighestDiscount),
+                StatusCode = StatusCodes.Status200OK
+            };
+        }
+
     }
 }

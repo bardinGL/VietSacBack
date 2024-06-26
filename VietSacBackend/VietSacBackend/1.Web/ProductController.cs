@@ -112,5 +112,12 @@ namespace VietSacBackend._1.Web
             }
             return NotFound($"No image found for product ID {id}.");
         }
+
+        [HttpGet("highest-discount")]
+        public IActionResult GetProductsWithHighestDiscount()
+        {
+            var responseModel = _productService.GetProductsWithHighestDiscount();
+            return StatusCode(responseModel.StatusCode, responseModel);
+        }
     }
 }

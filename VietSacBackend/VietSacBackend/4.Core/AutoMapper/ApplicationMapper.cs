@@ -29,9 +29,10 @@ namespace VietSacBackend._4.Core.AutoMapper
             CreateMap<ProductEntity, ProductModel>().ReverseMap();
             //CreateMap<RequestProductModel, ProductEntity>().ReverseMap();
             CreateMap<RequestProductModel, ProductEntity>()
-            .ForMember(dest => dest.category_id, opt => opt.MapFrom(src => src.category_id))  // Explicit mapping for category_id
+            .ForMember(dest => dest.category_id, opt => opt.MapFrom(src => src.category_id)) 
             .ReverseMap();
             CreateMap<ProductEntity, ResponseProductModel>().ReverseMap();
+            CreateMap<ProductEntity, GetProductModel>().ReverseMap();
 
             //Category
             CreateMap<CategoryEntity, RequestCategoryModel>().ReverseMap();
