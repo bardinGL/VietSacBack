@@ -21,10 +21,10 @@ jobs:
           include-prerelease: true
 
       - name: Build Project
-        run: dotnet build VietSacBackend.sln --configuration Release --no-restore
+        run: dotnet build VietSacBackend/VietSacBackend.sln --configuration Release --no-restore
 
       - name: Publish Project
-        run: dotnet publish VietSacBackend.sln --configuration Release --no-restore --output ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish VietSacBackend/VietSacBackend.sln --configuration Release --no-restore --output ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
