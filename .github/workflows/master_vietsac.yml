@@ -17,16 +17,14 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1' # Make sure this version matches your project requirements
+          dotnet-version: '3.1' # Ensure this version matches your project requirements
           include-prerelease: true
 
       - name: Build Project
-        run: dotnet build --configuration Release --no-restore
-        # No need to change the directory if your project is at the root
+        run: dotnet build VietSacBackend.sln --configuration Release --no-restore
 
       - name: Publish Project
-        run: dotnet publish --configuration Release --no-restore --output ${{env.DOTNET_ROOT}}/myapp
-        # Adjust the output directory as needed
+        run: dotnet publish VietSacBackend.sln --configuration Release --no-restore --output ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
@@ -42,7 +40,7 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'VietSac' # Ensure this is the name of your Azure Web App
-          slot-name: 'Production' # Adjust if using a different slot or remove if not using slots
+          app-name: 'VietSac'
+          slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_ECB999DD5AE345F488F05AF68E301F56 }}
           package: .
