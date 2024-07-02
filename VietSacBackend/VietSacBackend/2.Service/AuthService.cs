@@ -24,7 +24,7 @@ namespace VietSacBackend._2.Service
 
         public ResponseModel SignIn(SignInModel signInModel)
         {
-            var userLogin = _userRepository.GetSingle(x => x.userName.Equals(signInModel.userName) &&
+            var userLogin = _userRepository.GetSingle(x => x.email.Equals(signInModel.email) &&
             x.password.Equals(signInModel.password), x => x.Role);
 
             if (userLogin == null)
