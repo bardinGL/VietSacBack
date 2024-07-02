@@ -11,6 +11,14 @@
         public string? phone { get; set; }
 
         public string role_id { get; set; }
+        
+        public string? firstName { get; set; }
+        
+        public string? lastName { get; set; }
+        
+        public DateTime? DOB { get; set; }
+        
+        public string? gender { get; set; }
 
         public string? address { get; set; }
     }
