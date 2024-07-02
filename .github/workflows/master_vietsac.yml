@@ -1,0 +1,46 @@
+name: Build and deploy ASP.Net Core app to Azure Web App - VietSac
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1' # Ensure this version matches your project requirements
+          include-prerelease: true
+
+      - name: Build Project
+        run: dotnet build VietSacBackend/VietSacBackend.sln --configuration Release --no-restore
+
+      - name: Publish Project
+        run: dotnet publish VietSacBackend/VietSacBackend.sln --configuration Release --no-restore --output ${{env.DOTNET_ROOT}}/myapp
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: .net-app
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'VietSac'
+          slot-name: 'Production'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_ECB999DD5AE345F488F05AF68E301F56 }}
+          package: .
