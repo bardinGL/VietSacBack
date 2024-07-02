@@ -256,6 +256,9 @@ namespace VietSacBackend.Migrations
                     b.Property<DateTimeOffset>("CreatedTime")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<DateTime?>("DOB")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTimeOffset?>("DeletedTime")
                         .HasColumnType("datetimeoffset");
 
@@ -268,7 +271,13 @@ namespace VietSacBackend.Migrations
                     b.Property<string>("email")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("fullName")
+                    b.Property<string>("firstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("gender")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("lastName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("password")
