@@ -1,11 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using VietSacBackend._2.Service.Interface;
 using VietSacBackend._4.Core.Model.Order;
+using VietSacBackend._4.Core.Model;
 
 namespace VietSacBackend._1.Web
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] // Ensures that the user is authenticated
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
@@ -15,29 +19,51 @@ namespace VietSacBackend._1.Web
             _cartService = cartService;
         }
 
-        [HttpPost]
-        [Route("AddToCart")]
-        public IActionResult AddToCart(RequestCartModel requestCart)
+        [HttpPost("AddToCart")]
+        public IActionResult AddToCart([FromBody] RequestCartModel model)
         {
-            var response = _cartService.AddToCart(requestCart);
-            return Ok(response);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Extract UserId from JWT token
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            var responseModel = _cartService.AddToCart(userId, model);
+            if (responseModel.StatusCode == StatusCodes.Status404NotFound)
+            {
+                return NotFound(responseModel.MessageError);
+            }
+
+            return Ok(responseModel);
         }
 
-        [HttpDelete]
-        [Route("RemoveFromCart/{id}")]
+        [HttpDelete("RemoveFromCart/{id}")]
         public IActionResult RemoveFromCart(string id)
         {
-            var isSuccess = _cartService.RemoveFromCart(id);
-            if (!isSuccess) return NotFound();
-            return Ok();
+            var responseModel = _cartService.RemoveFromCart(id);
+            if (!responseModel)
+            {
+                return NotFound("Cart item not found");
+            }
+            return Ok(new { message = "Item removed from cart" });
         }
 
-        [HttpGet]
-        [Route("GetUserCart/{userId}")]
-        public IActionResult GetUserCart(string userId)
+        [HttpGet("GetUserCart")]
+        public IActionResult GetUserCart()
         {
-            var response = _cartService.GetUserCart(userId);
-            return Ok(response);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("Invalid token");
+            }
+
+            var responseModel = _cartService.GetUserCart(userId);
+            if (responseModel == null || !responseModel.Any())
+            {
+                return NotFound("No items found in cart");
+            }
+
+            return Ok(responseModel);
         }
     }
 }
