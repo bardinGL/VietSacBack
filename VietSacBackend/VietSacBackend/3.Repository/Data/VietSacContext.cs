@@ -23,6 +23,7 @@ namespace VietSacBackend._3.Repository.Data
         public DbSet<RoleEntity> roleEntities { get; set; }
         public DbSet<UserEntity> userEntities { get; set; }
         public DbSet<UserRefreshToken> userRefreshTokens { get; set; }
+        public DbSet<BlogEntity> blogEntities { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
