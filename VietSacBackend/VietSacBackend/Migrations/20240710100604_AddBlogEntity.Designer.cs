@@ -12,7 +12,7 @@ using VietSacBackend._3.Repository.Data;
 namespace VietSacBackend.Migrations
 {
     [DbContext(typeof(VietSacContext))]
-    [Migration("20240708070003_AddBlogEntity")]
+    [Migration("20240710100604_AddBlogEntity")]
     partial class AddBlogEntity
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,33 @@ namespace VietSacBackend.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+
+            modelBuilder.Entity("VietSacBackend._3.Repository.Data.BlogEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTimeOffset>("CreatedTime")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeletedTime")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("LastUpdatedTime")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("PictureLink")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("blogEntities");
+                });
 
             modelBuilder.Entity("VietSacBackend._3.Repository.Data.CartEntity", b =>
                 {
