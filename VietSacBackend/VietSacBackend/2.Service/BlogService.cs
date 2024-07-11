@@ -41,5 +41,11 @@ namespace VietSacBackend._2.Service
 
             return _mapper.Map<ResponseBlogModel>(blog);
         }
+
+        public async Task<IEnumerable<ResponseBlogModel>> GetAllBlogsAsync()
+        {
+            var blogs = await Task.Run(() => _blogRepository.GetAll());
+            return _mapper.Map<IEnumerable<ResponseBlogModel>>(blogs);
+        }
     }
 }

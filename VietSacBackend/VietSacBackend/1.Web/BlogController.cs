@@ -44,5 +44,16 @@ namespace VietSacBackend._1.Web.Controllers
             var result = await _blogService.AddBlogAsync(requestBlogModel);
             return StatusCode(result.StatusCode, result);
         }
+
+        [HttpGet]  // New endpoint
+        public async Task<IActionResult> GetAllBlogs()
+        {
+            var result = await _blogService.GetAllBlogsAsync();
+            return Ok(new ResponseModel
+            {
+                Data = result,
+                StatusCode = StatusCodes.Status200OK
+            });
+        }
     }
 }

@@ -8,5 +8,6 @@ namespace VietSacBackend._2.Service.Interface
     {
         Task<ResponseBlogModel> GetBlogByIdAsync(string id);
         Task<ResponseModel> AddBlogAsync(RequestBlogModel requestBlogModel);
+        Task<IEnumerable<ResponseBlogModel>> GetAllBlogsAsync();
     }
 }
