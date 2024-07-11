@@ -10,6 +10,7 @@ using System.Reflection;
 using VietSacBackend._4.Core.Helper;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using VietSacBackend._4.Core.AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +40,7 @@ builder.Services.AddDbContext<VietSacContext>(options =>
 });
 
 // AutoMapper
-builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddAutoMapper(typeof(ApplicationMapper)); // Ensure this is correct
 
 // Authentication
 builder.Services.AddAuthentication("Bearer").AddJwtBearer(options =>
@@ -66,6 +67,9 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 
+// Add Blog Repository
+builder.Services.AddScoped<IBlogRepository, BlogRepository>();
+
 // Service
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -74,6 +78,9 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ICartService, CartService>();
+
+// Add Blog Service
+builder.Services.AddScoped<IBlogService, BlogService>();
 
 // Auth
 builder.Services.AddScoped<GenerateToken>();

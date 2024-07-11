@@ -1,11 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace VietSacBackend._3.Repository.Data
 {
     public class VietSacContext : DbContext
     {
-        IConfiguration _configuration;
-
         public VietSacContext()
         {
         }
@@ -29,7 +28,6 @@ namespace VietSacBackend._3.Repository.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-
                 optionsBuilder.UseSqlServer(GetConnectionString());
             }
         }
@@ -38,10 +36,9 @@ namespace VietSacBackend._3.Repository.Data
         {
             IConfiguration config = new ConfigurationBuilder()
                  .SetBasePath(Directory.GetCurrentDirectory())
-                        .AddJsonFile("appsettings.json", true, true)
-                        .Build();
+                 .AddJsonFile("appsettings.json", true, true)
+                 .Build();
             var strConn = config["ConnectionStrings:VietSac"];
-
             return strConn;
         }
     }
