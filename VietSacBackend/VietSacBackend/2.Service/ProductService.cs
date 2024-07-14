@@ -135,15 +135,18 @@ namespace VietSacBackend._2.Service
         public ResponseModel<GetProductModel> GetProductsWithHighestDiscount()
         {
             var products = _productRepository.GetAll();
-            var maxDiscount = products.Max(p => p.discount);
-            var productsWithHighestDiscount = products.Where(p => p.discount == maxDiscount).ToList();
+
+            // Order by discount descending and take the top three products
+            var topThreeDiscountProducts = products
+                .OrderByDescending(p => p.discount)
+                .Take(3)
+                .ToList();
 
             return new ResponseModel<GetProductModel>
             {
-                Data = _mapper.Map<List<GetProductModel>>(productsWithHighestDiscount),
+                Data = _mapper.Map<List<GetProductModel>>(topThreeDiscountProducts),
                 StatusCode = StatusCodes.Status200OK
             };
         }
-
     }
 }
