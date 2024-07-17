@@ -22,7 +22,7 @@ namespace VietSacBackend._1.Web
         [HttpPost("AddToCart")]
         public IActionResult AddToCart([FromBody] RequestCartModel model)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Extract UserId from JWT token
+            var userId = User.FindFirst("UserID")?.Value;
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("Invalid token");

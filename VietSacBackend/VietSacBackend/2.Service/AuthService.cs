@@ -31,17 +31,24 @@ namespace VietSacBackend._2.Service
             {
                 return new ResponseModel
                 {
-                    MessageError = "Tài khoản hoặc mật khẩu không tồn tại",
+                    MessageError = "Invalid email or password",
+                    StatusCode = StatusCodes.Status404NotFound
                 };
             }
-            var Token = _generateTokenRepository.GenerateTokenModel(userLogin);
-            Token.ResponseUserModel = _mapper.Map<ResponseUserModel>(userLogin);
-            return new ResponseModel
+
+            var token = _generateTokenRepository.GenerateTokenModel(userLogin);
+            var responseTokenModel = new ResponseTokenModel
             {
-                Data = Token,
-                StatusCode = 200,
+                Token = token.Token,
+                RefreshToken = token.RefreshToken,
+                ResponseUserModel = _mapper.Map<ResponseUserModel>(userLogin)
             };
 
+            return new ResponseModel
+            {
+                Data = responseTokenModel,
+                StatusCode = StatusCodes.Status200OK
+            };
         }
 
         public ResponseModel SignUp(SignUpModel signUpModel)
@@ -52,7 +59,7 @@ namespace VietSacBackend._2.Service
             {
                 return new ResponseModel
                 {
-                    MessageError = "Username đã tồn tại",
+                    MessageError = "Username already exists",
                     StatusCode = StatusCodes.Status400BadRequest
                 };
             }
@@ -60,8 +67,7 @@ namespace VietSacBackend._2.Service
             return new ResponseModel
             {
                 Data = userEntity,
-                MessageError = "",
-                StatusCode = StatusCodes.Status200OK
+                StatusCode = StatusCodes.Status201Created
             };
         }
     }

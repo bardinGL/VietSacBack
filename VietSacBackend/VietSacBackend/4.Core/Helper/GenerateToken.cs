@@ -36,7 +36,7 @@ namespace VietSacBackend._4.Core.Helper
                     new Claim (JwtRegisteredClaimNames.Email, userEntity.email),
                     new Claim (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                     new Claim (ClaimTypes.Role, userEntity.Role.role_name.Trim()),
-                    new Claim ("UserID", userEntity.Id),
+                    new Claim ("UserID", userEntity.Id.ToString()),
                 }),
                 IssuedAt = DateTime.Now,
                 Expires = DateTime.Now.AddDays(1),

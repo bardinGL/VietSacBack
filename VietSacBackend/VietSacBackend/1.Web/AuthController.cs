@@ -17,18 +17,18 @@ namespace VietSacBackend._1.Web
 
         [HttpPost]
         [Route("api/[controller]/SignUpUser")]
-        public IActionResult CreateUser(SignUpModel signUpModel)
+        public IActionResult SignUpUser(SignUpModel signUpModel)
         {
             var responseModel = _authService.SignUp(signUpModel);
-            return Ok(responseModel);
+            return StatusCode(responseModel.StatusCode, responseModel);
         }
 
         [HttpPost]
         [Route("api/[controller]/SignInUser")]
-        public IActionResult CreateUser(SignInModel signIpModel)
+        public IActionResult SignInUser(SignInModel signInModel)
         {
-            var responseModel = _authService.SignIn(signIpModel);
-            return Ok(responseModel);
+            var responseModel = _authService.SignIn(signInModel);
+            return StatusCode(responseModel.StatusCode, responseModel);
         }
     }
 }
