@@ -22,33 +22,54 @@ namespace VietSacBackend._1.Web
         [HttpPost("AddToCart")]
         public IActionResult AddToCart([FromBody] RequestCartModel model)
         {
+            if (model == null || string.IsNullOrEmpty(model.ProductId) || model.Quantity <= 0)
+            {
+                return BadRequest("Invalid cart data.");
+            }
+
             var userId = User.FindFirst("UserID")?.Value;
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("Invalid token");
             }
 
-            Console.WriteLine($"User ID: {userId}");
-            Console.WriteLine($"Product ID: {model.ProductId}, Quantity: {model.Quantity}");
+            Console.WriteLine($"[AddToCart] User ID: {userId}, Product ID: {model.ProductId}, Quantity: {model.Quantity}");
 
-            var responseModel = _cartService.AddToCart(userId, model);
-            if (responseModel.StatusCode == StatusCodes.Status404NotFound)
+            try
             {
-                return NotFound(responseModel.MessageError);
+                var responseModel = _cartService.AddToCart(userId, model);
+                if (responseModel.StatusCode == StatusCodes.Status404NotFound)
+                {
+                    return NotFound(responseModel.MessageError);
+                }
+                return Ok(responseModel);
             }
-
-            return Ok(responseModel);
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AddToCart] Error: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while adding to cart.");
+            }
         }
 
         [HttpDelete("RemoveFromCart/{id}")]
         public IActionResult RemoveFromCart(string id)
         {
-            var responseModel = _cartService.RemoveFromCart(id);
-            if (!responseModel)
+            Console.WriteLine($"[RemoveFromCart] Cart Item ID: {id}");
+
+            try
             {
-                return NotFound("Cart item not found");
+                var responseModel = _cartService.RemoveFromCart(id);
+                if (!responseModel)
+                {
+                    return NotFound("Cart item not found");
+                }
+                return Ok(new { message = "Item removed from cart" });
             }
-            return Ok(new { message = "Item removed from cart" });
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[RemoveFromCart] Error: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while removing from cart.");
+            }
         }
 
         [HttpGet("GetUserCart")]
@@ -60,13 +81,60 @@ namespace VietSacBackend._1.Web
                 return Unauthorized("Invalid token");
             }
 
-            var responseModel = _cartService.GetUserCart(userId);
-            if (responseModel == null || !responseModel.Any())
-            {
-                return NotFound("No items found in cart");
-            }
+            Console.WriteLine($"[GetUserCart] User ID: {userId}");
 
-            return Ok(responseModel);
+            try
+            {
+                var responseModel = _cartService.GetUserCart(userId);
+                if (responseModel == null || !responseModel.Any())
+                {
+                    return NotFound("No items found in cart");
+                }
+                return Ok(responseModel);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetUserCart] Error: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the cart.");
+            }
+        }
+
+        [HttpGet("GetCartById/{id}")]
+        public IActionResult GetCartById(string id)
+        {
+            try
+            {
+                var responseModel = _cartService.GetCartById(id);
+                if (responseModel == null)
+                {
+                    return NotFound("Cart item not found");
+                }
+                return Ok(responseModel);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetCartById] Error: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the cart item.");
+            }
+        }
+
+        [HttpGet("GetAllCarts")]
+        public IActionResult GetAllCarts()
+        {
+            try
+            {
+                var responseModel = _cartService.GetAllCarts();
+                if (responseModel == null || !responseModel.Any())
+                {
+                    return NotFound("No items found in cart");
+                }
+                return Ok(responseModel);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetAllCarts] Error: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving the cart items.");
+            }
         }
     }
 }

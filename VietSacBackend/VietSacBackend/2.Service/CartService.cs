@@ -8,6 +8,7 @@ using VietSacBackend._3.Repository.Data;
 using VietSacBackend._4.Core.Model.Order;
 using VietSacBackend._4.Core.Model;
 using VietSacBackend._3.Repository.Repository;
+using Microsoft.EntityFrameworkCore;
 
 namespace VietSacBackend._2.Service
 {
@@ -17,20 +18,26 @@ namespace VietSacBackend._2.Service
         private readonly IProductRepository _productRepository;
         private readonly IGenericRepository<UserEntity> _userRepository;
         private readonly IProductService _productService;
+        private readonly ICategoryService _categoryService;
         private readonly IMapper _mapper;
+        private readonly VietSacContext _context;
 
         public CartService(
             ICartRepository cartRepository,
             IProductRepository productRepository,
             IGenericRepository<UserEntity> userRepository,
             IProductService productService,
-            IMapper mapper)
+            ICategoryService categoryService,
+            IMapper mapper,
+            VietSacContext context)
         {
             _cartRepository = cartRepository;
             _productRepository = productRepository;
             _userRepository = userRepository;
             _productService = productService;
+            _categoryService = categoryService;
             _mapper = mapper;
+            _context = context;
         }
 
         public ResponseModel AddToCart(string userId, RequestCartModel requestCart)
@@ -58,6 +65,23 @@ namespace VietSacBackend._2.Service
             }
 
             var product = _mapper.Map<ProductEntity>(productResponse.Data);
+
+            // Fetch and set the category explicitly
+            var categoryResponse = _categoryService.GetCategoryById(product.category_id);
+            if (categoryResponse != null && categoryResponse.Data != null)
+            {
+                var category = _mapper.Map<CategoryEntity>(categoryResponse.Data);
+                var existingCategory = _context.categoryEntities.Local.FirstOrDefault(c => c.Id == category.Id);
+                if (existingCategory == null)
+                {
+                    _context.Entry(category).State = EntityState.Unchanged;
+                    product.Category = category;
+                }
+                else
+                {
+                    product.Category = existingCategory;
+                }
+            }
 
             // Calculate total price
             var totalPrice = (product.price ?? 0) * requestCart.Quantity;
@@ -88,15 +112,20 @@ namespace VietSacBackend._2.Service
             cartEntity.quantity = requestCart.Quantity; // Set quantity
             cartEntity.order_id = null; // Initialize order_id if not part of the request
 
-            // Set additional properties from ProductEntity
-            cartEntity.category_id = product.category_id; // Set CategoryId from ProductEntity
-            cartEntity.product_name = product.name;
-            cartEntity.product_description = product.name;
-            cartEntity.product_image = product.image;
-            cartEntity.product_price = product.price ?? 0; // Original product price
-            cartEntity.product_discount = product.discount; // Discount if applicable
+            // Set navigation properties
+            cartEntity.Product = null;
+            cartEntity.User = null;
 
+            // Create the cart entity
             _cartRepository.Create(cartEntity);
+
+            // Attach the navigation properties after creation to avoid tracking conflicts
+            cartEntity.Product = product;
+            cartEntity.User = user;
+
+            // Save changes again to update the relationships
+            _context.SaveChanges();
+
             return new ResponseModel
             {
                 Data = _mapper.Map<ResponseCartModel>(cartEntity),
@@ -104,17 +133,76 @@ namespace VietSacBackend._2.Service
             };
         }
 
+
+
+
+
+
         public ResponseCartModel GetCartById(string id)
         {
-            var cart = _cartRepository.GetById(id);
+            var cart = _cartRepository.Get(c => c.Id == id, c => c.Product, c => c.User).FirstOrDefault();
+            if (cart == null) return null;
+
+            // Ensure the related category is included and tracked properly
+            var product = cart.Product;
+            if (product != null)
+            {
+                var categoryResponse = _categoryService.GetCategoryById(product.category_id);
+                if (categoryResponse != null && categoryResponse.Data != null)
+                {
+                    var category = _mapper.Map<CategoryEntity>(categoryResponse.Data);
+                    var existingCategory = _context.categoryEntities.Local.FirstOrDefault(c => c.Id == category.Id);
+                    if (existingCategory == null)
+                    {
+                        _context.Entry(category).State = EntityState.Unchanged;
+                        product.Category = category;
+                    }
+                    else
+                    {
+                        product.Category = existingCategory;
+                    }
+                }
+            }
+
             return _mapper.Map<ResponseCartModel>(cart);
         }
 
+
+
+
         public IEnumerable<ResponseCartModel> GetAllCarts()
         {
-            var carts = _cartRepository.GetAll();
+            var carts = _cartRepository.Get(null, c => c.Product, c => c.User).ToList();
+
+            foreach (var cart in carts)
+            {
+                var product = cart.Product;
+                if (product != null)
+                {
+                    var categoryResponse = _categoryService.GetCategoryById(product.category_id);
+                    if (categoryResponse != null && categoryResponse.Data != null)
+                    {
+                        var category = _mapper.Map<CategoryEntity>(categoryResponse.Data);
+                        var existingCategory = _context.categoryEntities.Local.FirstOrDefault(c => c.Id == category.Id);
+                        if (existingCategory == null)
+                        {
+                            _context.Entry(category).State = EntityState.Unchanged;
+                            product.Category = category;
+                        }
+                        else
+                        {
+                            product.Category = existingCategory;
+                        }
+                    }
+                }
+            }
+
             return _mapper.Map<IEnumerable<ResponseCartModel>>(carts);
         }
+
+
+
+
 
         public ResponseModel UpdateCart(string id, RequestCartModel requestCart)
         {
