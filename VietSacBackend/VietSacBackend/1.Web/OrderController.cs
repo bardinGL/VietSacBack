@@ -1,11 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using VietSacBackend._2.Service.Interface;
 using VietSacBackend._4.Core.Model.Order;
+using VietSacBackend._4.Core.Model;
 
 namespace VietSacBackend._1.Web
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
+    [Authorize] // Ensures that the user is authenticated
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
@@ -15,47 +19,22 @@ namespace VietSacBackend._1.Web
             _orderService = orderService;
         }
 
-        [HttpPost]
-        public IActionResult CreateOrder([FromBody] RequestOrderModel requestOrder)
+        [HttpPost("Checkout")]
+        public IActionResult Checkout()
         {
-            var result = _orderService.CreateOrder(requestOrder);
-            if (result != null)
-                return Ok(result);
-            return BadRequest();
-        }
+            var userId = User.FindFirst("UserID")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("Invalid token");
+            }
 
-        [HttpGet("{orderId}")]
-        public IActionResult GetOrderById(string orderId)
-        {
-            var result = _orderService.GetOrderById(orderId);
-            if (result != null)
-                return Ok(result);
-            return NotFound();
-        }
+            var responseModel = _orderService.CreateOrderFromCart(userId);
+            if (responseModel.StatusCode == StatusCodes.Status404NotFound)
+            {
+                return NotFound(responseModel.MessageError);
+            }
 
-        [HttpGet]
-        public IActionResult GetAllOrders()
-        {
-            var result = _orderService.GetAllOrders();
-            return Ok(result);
-        }
-
-        [HttpPut("{orderId}")]
-        public IActionResult UpdateOrder(string orderId, [FromBody] RequestOrderModel requestOrder)
-        {
-            var result = _orderService.UpdateOrder(orderId, requestOrder);
-            if (result != null)
-                return Ok(result);
-            return BadRequest();
-        }
-
-        [HttpDelete("{orderId}")]
-        public IActionResult DeleteOrder(string orderId)
-        {
-            var result = _orderService.DeleteOrder(orderId);
-            if (result)
-                return Ok();
-            return NotFound();
+            return Ok(responseModel);
         }
     }
 }

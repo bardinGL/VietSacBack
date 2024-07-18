@@ -1,61 +1,96 @@
-﻿using VietSacBackend._2.Service.Interface;
-using VietSacBackend._3.Repository.Repository;
-using VietSacBackend._4.Core.Model.Order;
-using AutoMapper;
+﻿using AutoMapper;
+using System;
+using System.Linq;
+using VietSacBackend._2.Service.Interface;
 using VietSacBackend._3.Repository.Data;
+using VietSacBackend._4.Core.Model.Order;
+using VietSacBackend._4.Core.Model;
+using VietSacBackend._4.Core.EnumCore;
+using Microsoft.EntityFrameworkCore;
+using VietSacBackend._3.Repository.Repository;
 
 namespace VietSacBackend._2.Service
 {
     public class OrderService : IOrderService
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly ICartRepository _cartRepository;
         private readonly IMapper _mapper;
+        private readonly VietSacContext _context;
 
-        public OrderService(IOrderRepository orderRepository, IMapper mapper)
+        public OrderService(
+            IOrderRepository orderRepository,
+            ICartRepository cartRepository,
+            IMapper mapper,
+            VietSacContext context)
         {
             _orderRepository = orderRepository;
+            _cartRepository = cartRepository;
             _mapper = mapper;
+            _context = context;
         }
 
-        public ResponseOrderModel CreateOrder(RequestOrderModel requestOrder)
+        public ResponseModel CreateOrderFromCart(string userId)
         {
-            var orderEntity = _mapper.Map<OrderEntity>(requestOrder);
-            var cartEntities = _mapper.Map<List<CartEntity>>(requestOrder.Carts);
-            var isSuccess = _orderRepository.CreateOrder(orderEntity, cartEntities);
-            if (!isSuccess) throw new Exception("Order creation failed");
+            // Fetch cart items for the user
+            var cartItems = _cartRepository.Get(c => c.user_id == userId).ToList();
+            if (cartItems == null || !cartItems.Any())
+            {
+                return new ResponseModel
+                {
+                    MessageError = "Cart is empty",
+                    StatusCode = StatusCodes.Status404NotFound
+                };
+            }
 
-            return _mapper.Map<ResponseOrderModel>(orderEntity);
-        }
+            // Calculate total price
+            var totalPrice = cartItems.Sum(item => item.price ?? 0);
 
-        public ResponseOrderModel GetOrderById(string id)
-        {
-            var order = _orderRepository.GetById(id);
-            return _mapper.Map<ResponseOrderModel>(order);
-        }
+            // Create the order
+            var orderEntity = new OrderEntity
+            {
+                user_id = userId,
+                order_date = DateTimeOffset.UtcNow,
+                orderTotal = totalPrice,
+                orderStatus = OrderStatus.DaXacNhan,
+                Carts = cartItems
+            };
 
-        public IEnumerable<ResponseOrderModel> GetAllOrders()
-        {
-            var orders = _orderRepository.GetAll();
-            return _mapper.Map<IEnumerable<ResponseOrderModel>>(orders);
-        }
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                try
+                {
+                    // Add order to the repository
+                    _orderRepository.Create(orderEntity);
 
-        public ResponseOrderModel UpdateOrder(string id, RequestOrderModel requestOrder)
-        {
-            var orderEntity = _orderRepository.GetById(id);
-            if (orderEntity == null) throw new Exception("Order not found");
+                    // Update the cart items with the order ID
+                    foreach (var item in cartItems)
+                    {
+                        item.order_id = orderEntity.Id;
+                        _cartRepository.Update(item);
+                    }
 
-            _mapper.Map(requestOrder, orderEntity);
-            _orderRepository.Update(orderEntity);
-            return _mapper.Map<ResponseOrderModel>(orderEntity);
-        }
+                    _context.SaveChanges();
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    var innerExceptionMessage = ex.InnerException?.Message ?? ex.Message;
 
-        public bool DeleteOrder(string id)
-        {
-            var orderEntity = _orderRepository.GetById(id);
-            if (orderEntity == null) return false;
+                    return new ResponseModel
+                    {
+                        MessageError = $"An error occurred while saving the entity changes. Details: {innerExceptionMessage}",
+                        StatusCode = StatusCodes.Status500InternalServerError
+                    };
+                }
+            }
 
-            _orderRepository.Delete(orderEntity);
-            return true;
+            return new ResponseModel
+            {
+                Data = _mapper.Map<ResponseOrderModel>(orderEntity),
+                StatusCode = StatusCodes.Status201Created
+            };
         }
     }
 }

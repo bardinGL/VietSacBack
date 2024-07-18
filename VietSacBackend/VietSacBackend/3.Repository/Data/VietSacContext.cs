@@ -41,5 +41,28 @@ namespace VietSacBackend._3.Repository.Data
             var strConn = config["ConnectionStrings:VietSac"];
             return strConn;
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<OrderEntity>()
+                .Property(o => o.orderTotal)
+                .HasColumnType("decimal(38,4)");
+
+            modelBuilder.Entity<CartEntity>()
+                .Property(c => c.price)
+                .HasColumnType("decimal(38,4)");
+
+            modelBuilder.Entity<CartEntity>()
+                .Property(c => c.quantity)
+                .HasColumnType("decimal(38,4)");
+
+            modelBuilder.Entity<ProductEntity>()
+                .Property(p => p.price)
+                .HasColumnType("decimal(38,4)");
+
+            modelBuilder.Entity<ProductEntity>()
+                .Property(p => p.quantity)
+                .HasColumnType("decimal(38,4)");
+        }
     }
 }
