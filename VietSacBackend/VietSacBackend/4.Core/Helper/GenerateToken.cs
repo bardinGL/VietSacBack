@@ -9,7 +9,6 @@ using VietSacBackend._3.Repository.BaseRepository;
 using VietSacBackend._3.Repository.Data;
 using VietSacBackend._4.Core.Model.Auth;
 
-
 namespace VietSacBackend._4.Core.Helper
 {
     public class GenerateToken
@@ -22,6 +21,7 @@ namespace VietSacBackend._4.Core.Helper
             _configuration = configuration;
             _userRefreshTokenRepository = repositoryBase;
         }
+
         public ResponseTokenModel GenerateTokenModel(UserEntity userEntity)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
@@ -32,25 +32,25 @@ namespace VietSacBackend._4.Core.Helper
                 Issuer = _configuration["JWT:ValidIssuer"],
                 Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim ("username", userEntity.userName),
-                    new Claim (JwtRegisteredClaimNames.Email, userEntity.email),
-                    new Claim (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim (ClaimTypes.Role, userEntity.Role.role_name.Trim()),
-                    new Claim ("UserID", userEntity.Id.ToString()),
+                    new Claim("username", userEntity.userName),
+                    new Claim(JwtRegisteredClaimNames.Email, userEntity.email),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim(ClaimTypes.Role, userEntity.Role.role_name.Trim()),
+                    new Claim("UserID", userEntity.Id.ToString()),
                 }),
                 IssuedAt = DateTime.Now,
                 Expires = DateTime.Now.AddDays(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes),
-                SecurityAlgorithms.HmacSha256Signature),
+                    SecurityAlgorithms.HmacSha256Signature),
             };
-            var Token = jwtTokenHandler.CreateToken(tokenDescription);
-            var accessToken = jwtTokenHandler.WriteToken(Token);
+            var token = jwtTokenHandler.CreateToken(tokenDescription);
+            var accessToken = jwtTokenHandler.WriteToken(token);
             var refreshToken = RefreshToken();
             var tokenEntity = new UserRefreshToken
             {
                 User_Id = userEntity.Id,
                 RefreshToken = refreshToken,
-                JwtId = Token.Id,
+                JwtId = token.Id,
                 isUsed = false,
                 CreateTime = DateTime.Now,
                 ExpireTime = DateTime.Now.AddMonths(6),
@@ -70,7 +70,7 @@ namespace VietSacBackend._4.Core.Helper
             {
                 rng.GetBytes(random);
                 return Convert.ToBase64String(random);
-            };
+            }
         }
     }
 }

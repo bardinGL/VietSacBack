@@ -28,6 +28,9 @@ namespace VietSacBackend._1.Web
                 return Unauthorized("Invalid token");
             }
 
+            Console.WriteLine($"User ID: {userId}");
+            Console.WriteLine($"Product ID: {model.ProductId}, Quantity: {model.Quantity}");
+
             var responseModel = _cartService.AddToCart(userId, model);
             if (responseModel.StatusCode == StatusCodes.Status404NotFound)
             {

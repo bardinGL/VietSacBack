@@ -57,6 +57,9 @@ namespace VietSacBackend._2.Service
             // Calculate total price
             var totalPrice = product.price * requestCart.Quantity;
 
+            Console.WriteLine($"User ID: {userId}");
+            Console.WriteLine($"Product ID: {requestCart.ProductId}, Quantity: {requestCart.Quantity}, Total Price: {totalPrice}");
+
             // Check if the item already exists in the cart
             var existingCartItem = _cartRepository.Get(c => c.user_id == userId && c.product_id == requestCart.ProductId).FirstOrDefault();
             if (existingCartItem != null)
