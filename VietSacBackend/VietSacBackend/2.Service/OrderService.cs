@@ -53,7 +53,7 @@ namespace VietSacBackend._2.Service
                 order_date = DateTimeOffset.UtcNow,
                 orderTotal = totalPrice,
                 orderStatus = OrderStatus.DaXacNhan,
-                Carts = cartItems
+                //Carts = cartItems // Xóa cái này đi 
             };
 
             using (var transaction = _context.Database.BeginTransaction())
@@ -68,6 +68,11 @@ namespace VietSacBackend._2.Service
                     {
                         item.order_id = orderEntity.Id;
                         _cartRepository.Update(item);
+                    }
+
+                    foreach (var item in cartItems)
+                    {
+                        _cartRepository.Delete(item);
                     }
 
                     _context.SaveChanges();
