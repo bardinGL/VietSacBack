@@ -26,5 +26,12 @@ namespace VietSacBackend._3.Repository.Data
 
         [ForeignKey(nameof(user_id))]
         public UserEntity User { get; set; }
+
+        public string category_id { get; set; } // New property for CategoryId
+        public string product_name { get; set; } // New property for Product Name
+        public string product_description { get; set; } // New property for Product Description
+        public string product_image { get; set; } // New property for Product Image
+        public decimal product_price { get; set; } // New property for Original Product Price
+        public int? product_discount { get; set; } // New property for Product Discount
     }
 }

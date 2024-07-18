@@ -16,17 +16,20 @@ namespace VietSacBackend._2.Service
         private readonly ICartRepository _cartRepository;
         private readonly IProductRepository _productRepository;
         private readonly IGenericRepository<UserEntity> _userRepository;
+        private readonly IProductService _productService;
         private readonly IMapper _mapper;
 
         public CartService(
             ICartRepository cartRepository,
             IProductRepository productRepository,
             IGenericRepository<UserEntity> userRepository,
+            IProductService productService,
             IMapper mapper)
         {
             _cartRepository = cartRepository;
             _productRepository = productRepository;
             _userRepository = userRepository;
+            _productService = productService;
             _mapper = mapper;
         }
 
@@ -44,8 +47,8 @@ namespace VietSacBackend._2.Service
             }
 
             // Validate product
-            var product = _productRepository.GetById(requestCart.ProductId);
-            if (product == null)
+            var productResponse = _productService.GetProductById(requestCart.ProductId);
+            if (productResponse == null || productResponse.Data == null)
             {
                 return new ResponseModel
                 {
@@ -54,8 +57,10 @@ namespace VietSacBackend._2.Service
                 };
             }
 
+            var product = _mapper.Map<ProductEntity>(productResponse.Data);
+
             // Calculate total price
-            var totalPrice = product.price * requestCart.Quantity;
+            var totalPrice = (product.price ?? 0) * requestCart.Quantity;
 
             Console.WriteLine($"User ID: {userId}");
             Console.WriteLine($"Product ID: {requestCart.ProductId}, Quantity: {requestCart.Quantity}, Total Price: {totalPrice}");
@@ -79,6 +84,18 @@ namespace VietSacBackend._2.Service
             var cartEntity = _mapper.Map<CartEntity>(requestCart);
             cartEntity.user_id = userId; // Set the UserId
             cartEntity.price = totalPrice; // Set total price
+            cartEntity.product_id = product.Id; // Set ProductId
+            cartEntity.quantity = requestCart.Quantity; // Set quantity
+            cartEntity.order_id = null; // Initialize order_id if not part of the request
+
+            // Set additional properties from ProductEntity
+            cartEntity.category_id = product.category_id; // Set CategoryId from ProductEntity
+            cartEntity.product_name = product.name;
+            cartEntity.product_description = product.name;
+            cartEntity.product_image = product.image;
+            cartEntity.product_price = product.price ?? 0; // Original product price
+            cartEntity.product_discount = product.discount; // Discount if applicable
+
             _cartRepository.Create(cartEntity);
             return new ResponseModel
             {

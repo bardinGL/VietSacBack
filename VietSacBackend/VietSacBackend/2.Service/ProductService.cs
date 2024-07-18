@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using VietSacBackend._2.Service.Interface;
 using VietSacBackend._3.Repository.Repository;
 using VietSacBackend._3.Repository.Data;
@@ -24,6 +24,13 @@ namespace VietSacBackend._2.Service
             _mapper = mapper;
         }
 
+        private ProductEntity GetProductWithCategory(string productId)
+        {
+            return _context.productEntities
+                .Include(p => p.Category)
+                .FirstOrDefault(p => p.Id == productId);
+        }
+
         public ResponseModel CreateProduct(RequestProductModel requestProductModel)
         {
             var productEntity = _mapper.Map<ProductEntity>(requestProductModel);
@@ -37,10 +44,7 @@ namespace VietSacBackend._2.Service
 
         public ResponseModel UpdateProduct(string id, RequestProductModel requestProductModel)
         {
-            var productEntity = _context.productEntities
-                .Include(p => p.Category)
-                .FirstOrDefault(p => p.Id == id);
-
+            var productEntity = GetProductWithCategory(id);
             if (productEntity == null)
             {
                 return new ResponseModel
@@ -87,10 +91,7 @@ namespace VietSacBackend._2.Service
 
         public ResponseModel GetProductById(string id)
         {
-            var product = _context.productEntities
-                .Include(p => p.Category)
-                .FirstOrDefault(p => p.Id == id);
-
+            var product = GetProductWithCategory(id);
             if (product == null)
             {
                 return new ResponseModel
@@ -109,10 +110,7 @@ namespace VietSacBackend._2.Service
 
         public ResponseModel GetAllProducts()
         {
-            var products = _context.productEntities
-                .Include(p => p.Category)
-                .ToList();
-
+            var products = _productRepository.GetAll();
             return new ResponseModel
             {
                 Data = _mapper.Map<List<ResponseProductModel>>(products),
@@ -122,38 +120,26 @@ namespace VietSacBackend._2.Service
 
         public IEnumerable<ResponseProductModel> GetProductsByCategory(string categoryId)
         {
-            var products = _context.productEntities
-                .Include(p => p.Category)
-                .Where(p => p.category_id == categoryId)
-                .ToList();
-
+            var products = _productRepository.Get(p => p.category_id == categoryId).ToList();
             return _mapper.Map<IEnumerable<ResponseProductModel>>(products);
         }
 
         public IEnumerable<ResponseProductModel> GetProductsByBrand(string brand)
         {
-            var products = _context.productEntities
-                .Include(p => p.Category)
-                .Where(p => p.Category.Brand == brand)
-                .ToList();
-
+            var products = _productRepository.Get(p => p.Category.Brand == brand).ToList();
             return _mapper.Map<IEnumerable<ResponseProductModel>>(products);
         }
 
         public IEnumerable<ResponseProductModel> GetProductsByPurpose(string purpose)
         {
-            var products = _context.productEntities
-                .Include(p => p.Category)
-                .Where(p => p.Category.Purpose == purpose)
-                .ToList();
-
+            var products = _productRepository.Get(p => p.Category.Purpose == purpose).ToList();
             return _mapper.Map<IEnumerable<ResponseProductModel>>(products);
         }
 
         // New methods to handle product images
         public IEnumerable<string> GetAllProductImages()
         {
-            var products = _context.productEntities.ToList();
+            var products = _productRepository.GetAll();
             return products.Select(p => p.image).Where(img => img != null).ToList();
         }
 
@@ -165,7 +151,7 @@ namespace VietSacBackend._2.Service
 
         public ResponseModel<GetProductModel> GetProductsWithHighestDiscount()
         {
-            var products = _context.productEntities.ToList();
+            var products = _productRepository.GetAll();
 
             // Order by discount descending and take the top three products
             var topThreeDiscountProducts = products
