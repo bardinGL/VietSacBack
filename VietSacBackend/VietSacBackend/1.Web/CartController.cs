@@ -75,7 +75,7 @@ namespace VietSacBackend._1.Web
         [HttpGet("GetUserCart")]
         public IActionResult GetUserCart()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = User.FindFirst("UserID")?.Value;
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("Invalid token");
